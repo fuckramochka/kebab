@@ -1,7 +1,7 @@
 {
   "name": "kebab-clicker",
   "version": "1.0.0",
-  "description": "Кебаб Клікер з рейтингом і збереженням",
+  "description": "Кебаб Клікер з рейтингом та повним захистом від зуму на iOS",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
