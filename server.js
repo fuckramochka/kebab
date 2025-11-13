@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
@@ -7,11 +6,17 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Шлях до бази даних (важливо для Render)
+// Підключення до SQLite (з постійним диском на Render)
 const dbPath = path.resolve(__dirname, 'game.db');
-const db = new sqlite3.Database(dbPath);
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('❌ Не вдалося підключитися до бази:', err.message);
+    } else {
+        console.log('✅ База даних готова');
+    }
+});
 
-// Створення таблиці гравців
+// Створення таблиці
 db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS players (
@@ -24,28 +29,34 @@ db.serialize(() => {
             autoClickers INTEGER DEFAULT 0,
             coins INTEGER DEFAULT 0
         )
-    `);
+    `, (err) => {
+        if (err) {
+            console.error('❌ Помилка створення таблиці:', err.message);
+        } else {
+            console.log('✅ Таблиця players створена');
+        }
+    });
 });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'frontend'))); // Віддаємо статичні файли
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // === API ===
 app.post('/api/load', (req, res) => {
     const { user_id } = req.body;
-    if (!user_id) return res.json({ success: false, error: "No user_id" });
+    if (!user_id) return res.status(400).json({ success: false, error: "No user_id" });
 
     db.get(`SELECT * FROM players WHERE user_id = ?`, [user_id], (err, row) => {
-        if (err) return res.json({ success: false });
+        if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, state: row || null });
     });
 });
 
 app.post('/api/save', (req, res) => {
     const { user_id, username, state } = req.body;
-    if (!user_id || !state) return res.json({ success: false });
+    if (!user_id || !state) return res.status(400).json({ success: false, error: "Invalid data" });
 
     const { clicks, totalClicks, level, clickPower, autoClickers, coins } = state;
 
@@ -63,7 +74,10 @@ app.post('/api/save', (req, res) => {
     `);
     sql.run([user_id, username || '', clicks, totalClicks, level, clickPower, autoClickers, coins], (err) => {
         sql.finalize();
-        if (err) return res.json({ success: false });
+        if (err) {
+            console.error('❌ Помилка збереження:', err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
         res.json({ success: true });
     });
 });
@@ -75,17 +89,17 @@ app.get('/api/leaderboard', (req, res) => {
         ORDER BY totalClicks DESC 
         LIMIT 10
     `, (err, rows) => {
-        if (err) return res.json({ success: false });
+        if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, leaderboard: rows });
     });
 });
 
-// === Віддача фронтенду (гри) ===
+// === Віддача фронтенду ===
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
 // Запуск
-app.listen(PORT, () => {
-    console.log(`✅ Сервер запущено: http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Сервер запущено на порту ${PORT}`);
 });

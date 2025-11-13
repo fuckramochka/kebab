@@ -2,246 +2,85 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🥙 Кебаб Клікер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ... (стилі з твого оригіналу) ... */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%);
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            min-height: 100vh; padding: 20px; overflow-x: hidden;
         }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            font-size: 2.5rem;
-            color: white;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        .header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1rem;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-        }
-        .stat-label {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.875rem;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            color: white;
-            font-size: 1.75rem;
-            font-weight: bold;
-        }
-        .stat-value.coins {
-            color: #fbbf24;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5rem; color: white; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { color: rgba(255,255,255,0.9); font-size: 1rem; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 15px; padding: 15px; text-align: center; }
+        .stat-label { color: rgba(255,255,255,0.8); font-size: 0.875rem; margin-bottom: 5px; }
+        .stat-value { color: white; font-size: 1.75rem; font-weight: bold; }
+        .stat-value.coins { color: #fbbf24; }
         .clicker-section {
-            position: relative;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 30px;
+            position: relative; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 30px; padding: 40px; text-align: center; margin-bottom: 30px;
         }
         .kebab-button {
-            cursor: pointer;
-            transition: transform 0.1s;
-            border: none;
-            background: none;
-            padding: 0;
-        }
-        .kebab-button:hover {
-            transform: scale(1.05);
-        }
-        .kebab-button:active {
-            transform: scale(0.95);
+            cursor: pointer; border: none; background: none; padding: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .kebab-button img {
-            width: 250px;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 8px solid #fbbf24;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            user-select: none;
-            -webkit-user-drag: none;
+            width: 250px; height: 250px; object-fit: cover; border-radius: 50%;
+            border: 8px solid #fbbf24; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            user-select: none; -webkit-user-drag: none;
         }
-        .click-count {
-            color: white;
-            font-weight: bold;
-            font-size: 1.5rem;
-            margin-top: 20px;
-        }
-        .click-power {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.875rem;
-            margin-top: 5px;
-        }
+        .click-count { color: white; font-weight: bold; font-size: 1.5rem; margin-top: 20px; }
+        .click-power { color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-top: 5px; }
         .floating-number {
-            position: absolute;
-            color: #fbbf24;
-            font-weight: bold;
-            font-size: 2rem;
-            pointer-events: none;
-            animation: float-up 1s ease-out forwards;
+            position: absolute; color: #fbbf24; font-weight: bold; font-size: 2rem;
+            pointer-events: none; animation: float-up 1s ease-out forwards;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         @keyframes float-up {
             0% { opacity: 1; transform: translateY(0); }
             100% { opacity: 0; transform: translateY(-80px); }
         }
-        .shop {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .shop, .achievements {
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 20px; margin-bottom: 20px;
         }
-        .shop-title {
-            color: white;
-            font-weight: bold;
-            font-size: 1.25rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .shop-title, .achievements-title {
+            color: white; font-weight: bold; font-size: 1.25rem; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
         }
         .upgrade-button {
-            width: 100%;
-            background: #eab308;
-            color: white;
-            font-weight: bold;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            margin-bottom: 15px;
+            width: 100%; background: #eab308; color: white; font-weight: bold; padding: 15px;
+            border: none; border-radius: 12px; cursor: pointer; margin-bottom: 15px;
             transition: all 0.2s;
         }
-        .upgrade-button:hover:not(:disabled) {
-            background: #ca8a04;
-            transform: translateY(-2px);
-        }
-        .upgrade-button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        .upgrade-button:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        .upgrade-button.auto {
-            background: #22c55e;
-        }
-        .upgrade-button.auto:hover:not(:disabled) {
-            background: #16a34a;
-        }
-        .upgrade-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .upgrade-detail {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.8);
-            margin-top: 5px;
-        }
-        .achievements {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .achievements-title {
-            color: white;
-            font-weight: bold;
-            font-size: 1.25rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .upgrade-button.auto { background: #22c55e; }
+        .upgrade-button:disabled { background: #9ca3af; cursor: not-allowed; opacity: 0.6; }
+        .upgrade-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .upgrade-detail { font-size: 0.75rem; color: rgba(255,255,255,0.8); margin-top: 5px; }
         .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            text-align: center;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;
         }
         .achievement {
-            background: rgba(107, 114, 128, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-            transition: all 0.3s;
+            background: rgba(107, 114, 128, 0.5); padding: 10px; border-radius: 10px;
         }
-        .achievement.unlocked {
-            background: #22c55e;
-        }
-        .achievement-icon {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        .achievement-label {
-            color: white;
-            font-size: 0.75rem;
-        }
+        .achievement.unlocked { background: #22c55e; }
+        .achievement-icon { font-size: 1.5rem; margin-bottom: 5px; }
+        .achievement-label { color: white; font-size: 0.75rem; }
         .reset-button {
-            width: 100%;
-            background: #dc2626;
-            color: white;
-            font-weight: bold;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 20px;
-        }
-        .reset-button:hover {
-            background: #b91c1c;
+            width: 100%; background: #dc2626; color: white; font-weight: bold; padding: 12px;
+            border: none; border-radius: 12px; cursor: pointer; margin-bottom: 20px;
         }
         .auto-info {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            font-size: 0.875rem;
-            margin-top: 20px;
+            text-align: center; color: rgba(255,255,255,0.9); font-size: 0.875rem; margin-top: 20px;
         }
         #leaderboard-list {
-            color: white;
-            font-size: 0.9rem;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
+            color: white; font-size: 0.9rem; text-align: left; max-height: 200px; overflow-y: auto;
         }
     </style>
 </head>
@@ -296,38 +135,14 @@
         <div class="achievements">
             <div class="achievements-title">🏆 Досягнення</div>
             <div class="achievements-grid">
-                <div class="achievement" data-target="100">
-                    <div class="achievement-icon">🥉</div>
-                    <div class="achievement-label">100</div>
-                </div>
-                <div class="achievement" data-target="1000">
-                    <div class="achievement-icon">🥈</div>
-                    <div class="achievement-label">1K</div>
-                </div>
-                <div class="achievement" data-target="10000">
-                    <div class="achievement-icon">🥇</div>
-                    <div class="achievement-label">10K</div>
-                </div>
-                <div class="achievement" data-target="100000">
-                    <div class="achievement-icon">💎</div>
-                    <div class="achievement-label">100K</div>
-                </div>
-                <div class="achievement" data-target="1000000">
-                    <div class="achievement-icon">👑</div>
-                    <div class="achievement-label">1M</div>
-                </div>
-                <div class="achievement" data-target="10000000">
-                    <div class="achievement-icon">🌟</div>
-                    <div class="achievement-label">10M</div>
-                </div>
-                <div class="achievement" data-target="100000000">
-                    <div class="achievement-icon">🔥</div>
-                    <div class="achievement-label">100M</div>
-                </div>
-                <div class="achievement" data-target="1000000000">
-                    <div class="achievement-icon">🚀</div>
-                    <div class="achievement-label">1B</div>
-                </div>
+                <div class="achievement" data-target="100"><div class="achievement-icon">🥉</div><div class="achievement-label">100</div></div>
+                <div class="achievement" data-target="1000"><div class="achievement-icon">🥈</div><div class="achievement-label">1K</div></div>
+                <div class="achievement" data-target="10000"><div class="achievement-icon">🥇</div><div class="achievement-label">10K</div></div>
+                <div class="achievement" data-target="100000"><div class="achievement-icon">💎</div><div class="achievement-label">100K</div></div>
+                <div class="achievement" data-target="1000000"><div class="achievement-icon">👑</div><div class="achievement-label">1M</div></div>
+                <div class="achievement" data-target="10000000"><div class="achievement-icon">🌟</div><div class="achievement-label">10M</div></div>
+                <div class="achievement" data-target="100000000"><div class="achievement-icon">🔥</div><div class="achievement-label">100M</div></div>
+                <div class="achievement" data-target="1000000000"><div class="achievement-icon">🚀</div><div class="achievement-label">1B</div></div>
             </div>
         </div>
 
@@ -344,7 +159,6 @@
     </div>
 
     <script>
-        // === ФРОНТЕНД З АВТОРИЗАЦІЄЮ ТА API ===
         let tgUser = null;
         let isAuthorized = false;
 
@@ -358,19 +172,15 @@
             }
         }
 
-        // 🔁 ЗМІНИ ЦЕ НА СВІЙ АДРЕСУ СЕРВЕРА ПІСЛЯ РОЗГОРТАННЯ!
+        // ✅ Відносний шлях — працює на тому самому домені
         const API_URL = "/api";
 
         let gameState = {
-            clicks: 0,
-            totalClicks: 0,
-            level: 1,
-            clickPower: 1,
-            autoClickers: 0,
-            coins: 0
+            clicks: 0, totalClicks: 0, level: 1,
+            clickPower: 1, autoClickers: 0, coins: 0
         };
 
-        const elements = {
+        const e = {
             clicks: document.getElementById('clicks'),
             total: document.getElementById('total'),
             level: document.getElementById('level'),
@@ -391,62 +201,50 @@
             leaderboardList: document.getElementById('leaderboard-list')
         };
 
-        function getPowerCost() {
-            return Math.floor(50 * Math.pow(1.5, gameState.clickPower - 1));
-        }
-
-        function getAutoCost() {
-            return Math.floor(200 * Math.pow(1.8, gameState.autoClickers));
-        }
-
-        function formatNumber(num) {
-            return num.toLocaleString('uk-UA');
-        }
+        function getPowerCost() { return Math.floor(50 * Math.pow(1.5, gameState.clickPower - 1)); }
+        function getAutoCost() { return Math.floor(200 * Math.pow(1.8, gameState.autoClickers)); }
+        function formatNumber(n) { return n.toLocaleString('uk-UA'); }
 
         function showFloatingNumber(x, y, value) {
-            const floating = document.createElement('div');
-            floating.className = 'floating-number';
-            floating.textContent = '+' + value;
-            floating.style.left = x + 'px';
-            floating.style.top = y + 'px';
-            elements.clickerSection.appendChild(floating);
-            setTimeout(() => floating.remove(), 1000);
+            const f = document.createElement('div');
+            f.className = 'floating-number';
+            f.textContent = '+' + value;
+            f.style.left = x + 'px';
+            f.style.top = y + 'px';
+            e.clickerSection.appendChild(f);
+            setTimeout(() => f.remove(), 1000);
         }
 
         function updateUI() {
-            elements.clicks.textContent = formatNumber(gameState.clicks);
-            elements.total.textContent = formatNumber(gameState.totalClicks);
-            elements.level.textContent = gameState.level;
-            elements.coins.textContent = formatNumber(gameState.coins);
-            elements.clickPower.textContent = formatNumber(gameState.clickPower);
-            elements.currentPower.textContent = formatNumber(gameState.clickPower);
-            elements.powerCost.textContent = formatNumber(getPowerCost());
-            elements.autoCost.textContent = formatNumber(getAutoCost());
-            elements.autoCount.textContent = gameState.autoClickers;
-            elements.autoRate.textContent = gameState.autoClickers;
-            elements.autoDisplay.textContent = gameState.autoClickers;
+            e.clicks.textContent = formatNumber(gameState.clicks);
+            e.total.textContent = formatNumber(gameState.totalClicks);
+            e.level.textContent = gameState.level;
+            e.coins.textContent = formatNumber(gameState.coins);
+            e.clickPower.textContent = gameState.clickPower;
+            e.currentPower.textContent = gameState.clickPower;
+            e.powerCost.textContent = formatNumber(getPowerCost());
+            e.autoCost.textContent = formatNumber(getAutoCost());
+            e.autoCount.textContent = gameState.autoClickers;
+            e.autoRate.textContent = gameState.autoClickers;
+            e.autoDisplay.textContent = gameState.autoClickers;
+            e.autoInfo.style.display = gameState.autoClickers > 0 ? 'block' : 'none';
+            e.powerUpgrade.disabled = gameState.coins < getPowerCost();
+            e.autoUpgrade.disabled = gameState.coins < getAutoCost();
 
-            if (gameState.autoClickers > 0) {
-                elements.autoInfo.style.display = 'block';
-            } else {
-                elements.autoInfo.style.display = 'none';
-            }
-
-            elements.powerUpgrade.disabled = gameState.coins < getPowerCost();
-            elements.autoUpgrade.disabled = gameState.coins < getAutoCost();
-
-            document.querySelectorAll('.achievement').forEach(ach => {
-                const target = parseInt(ach.dataset.target);
-                ach.classList.toggle('unlocked', gameState.totalClicks >= target);
+            document.querySelectorAll('.achievement').forEach(a => {
+                const t = parseInt(a.dataset.target);
+                a.classList.toggle('unlocked', gameState.totalClicks >= t);
             });
 
             const newLevel = Math.floor(gameState.totalClicks / 100) + 1;
-            if (newLevel > gameState.level) {
-                gameState.level = newLevel;
-            }
+            if (newLevel > gameState.level) gameState.level = newLevel;
         }
 
-        async function loadGameFromServer() {
+        async function loadGame() {
+            if (!isAuthorized) {
+                e.leaderboardList.innerHTML = "❌ Потрібно запускати в Telegram";
+                return;
+            }
             try {
                 const res = await fetch(`${API_URL}/load`, {
                     method: 'POST',
@@ -454,17 +252,15 @@
                     body: JSON.stringify({ user_id: tgUser.id })
                 });
                 const data = await res.json();
-                if (data.success && data.state) {
-                    Object.assign(gameState, data.state);
-                }
+                if (data.success && data.state) Object.assign(gameState, data.state);
                 updateUI();
                 loadLeaderboard();
-            } catch (e) {
-                elements.leaderboardList.innerHTML = "Помилка з'єднання";
+            } catch (err) {
+                e.leaderboardList.innerHTML = "❌ Помилка з'єднання";
             }
         }
 
-        async function saveGameToServer() {
+        async function saveGame() {
             if (!isAuthorized) return;
             try {
                 await fetch(`${API_URL}/save`, {
@@ -483,7 +279,7 @@
                         }
                     })
                 });
-            } catch (e) {
+            } catch (err) {
                 console.error("Не вдалося зберегти");
             }
         }
@@ -493,60 +289,51 @@
                 const res = await fetch(`${API_URL}/leaderboard`);
                 const data = await res.json();
                 if (data.success && data.leaderboard) {
-                    elements.leaderboardList.innerHTML = data.leaderboard.map((p, i) => {
+                    e.leaderboardList.innerHTML = data.leaderboard.map((p, i) => {
                         const name = p.username || `User${p.user_id}`;
-                        return `<div>${i + 1}. <b>${name}</b>: ${formatNumber(p.totalClicks)} 🥙</div>`;
+                        return `<div>${i+1}. <b>${name}</b>: ${formatNumber(p.totalClicks)} 🥙</div>`;
                     }).join('');
                 }
-            } catch (e) {
-                elements.leaderboardList.innerHTML = "Не вдалося завантажити";
+            } catch (err) {
+                e.leaderboardList.innerHTML = "❌ Не вдалося завантажити";
             }
         }
 
-        // Івенти
-        elements.kebabButton.addEventListener('click', (e) => {
+        e.kebabButton.addEventListener('click', (ev) => {
             gameState.clicks += gameState.clickPower;
             gameState.totalClicks += gameState.clickPower;
             gameState.coins += gameState.clickPower;
-
-            const rect = elements.clickerSection.getBoundingClientRect();
-            showFloatingNumber(e.clientX - rect.left, e.clientY - rect.top, gameState.clickPower);
+            const r = e.clickerSection.getBoundingClientRect();
+            showFloatingNumber(ev.clientX - r.left, ev.clientY - r.top, gameState.clickPower);
             updateUI();
-            saveGameToServer();
+            saveGame();
         });
 
-        elements.powerUpgrade.addEventListener('click', () => {
-            const cost = getPowerCost();
-            if (gameState.coins >= cost) {
-                gameState.coins -= cost;
+        e.powerUpgrade.addEventListener('click', () => {
+            const c = getPowerCost();
+            if (gameState.coins >= c) {
+                gameState.coins -= c;
                 gameState.clickPower++;
                 updateUI();
-                saveGameToServer();
+                saveGame();
             }
         });
 
-        elements.autoUpgrade.addEventListener('click', () => {
-            const cost = getAutoCost();
-            if (gameState.coins >= cost) {
-                gameState.coins -= cost;
+        e.autoUpgrade.addEventListener('click', () => {
+            const c = getAutoCost();
+            if (gameState.coins >= c) {
+                gameState.coins -= c;
                 gameState.autoClickers++;
                 updateUI();
-                saveGameToServer();
+                saveGame();
             }
         });
 
-        elements.resetButton.addEventListener('click', () => {
-            if (confirm('Скинути гру? Весь прогрес буде втрачено!')) {
-                gameState = {
-                    clicks: 0,
-                    totalClicks: 0,
-                    level: 1,
-                    clickPower: 1,
-                    autoClickers: 0,
-                    coins: 0
-                };
+        e.resetButton.addEventListener('click', () => {
+            if (confirm('Скинути гру?')) {
+                gameState = { clicks: 0, totalClicks: 0, level: 1, clickPower: 1, autoClickers: 0, coins: 0 };
                 updateUI();
-                saveGameToServer();
+                saveGame();
             }
         });
 
@@ -556,18 +343,18 @@
                 gameState.totalClicks += gameState.autoClickers;
                 gameState.coins += gameState.autoClickers;
                 updateUI();
-                saveGameToServer();
+                saveGame();
             }
         }, 1000);
 
         // Старт
         if (isAuthorized) {
-            loadGameFromServer();
+            loadGame();
         } else {
-            // Для тестування поза Telegram
+            // Для тестування поза Telegram (не використовується в продакшені)
             tgUser = { id: 999999, first_name: "Тестер", username: "testuser" };
             isAuthorized = true;
-            loadGameFromServer();
+            loadGame();
         }
     </script>
 </body>
