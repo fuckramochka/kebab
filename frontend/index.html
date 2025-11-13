@@ -11,7 +11,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%);
             min-height: 100vh; padding: 20px; overflow-x: hidden;
-            -webkit-text-size-adjust: 100%;
         }
         .container { max-width: 500px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 30px; }
@@ -30,17 +29,11 @@
             cursor: pointer; border: none; background: none; padding: 0;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            outline: none;
         }
         .kebab-button img {
             width: 250px; height: 250px; object-fit: cover; border-radius: 50%;
             border: 8px solid #fbbf24; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            user-select: none;
-            -webkit-user-drag: none;
-            pointer-events: none;
+            user-select: none; -webkit-user-drag: none;
         }
         .click-count { color: white; font-weight: bold; font-size: 1.5rem; margin-top: 20px; }
         .click-power { color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-top: 5px; }
@@ -99,9 +92,18 @@
         </div>
 
         <div class="stats">
-            <div class="stat-card"><div class="stat-label">Рівень</div><div class="stat-value" id="level">1</div></div>
-            <div class="stat-card"><div class="stat-label">Монети</div><div class="stat-value coins" id="coins">0</div></div>
-            <div class="stat-card"><div class="stat-label">Всього</div><div class="stat-value" id="total">0</div></div>
+            <div class="stat-card">
+                <div class="stat-label">Рівень</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Монети</div>
+                <div class="stat-value coins" id="coins">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Всього</div>
+                <div class="stat-value" id="total">0</div>
+            </div>
         </div>
 
         <div class="clicker-section" id="clicker-section">
@@ -115,11 +117,17 @@
         <div class="shop">
             <div class="shop-title">⚡ Магазин покращень</div>
             <button class="upgrade-button" id="power-upgrade">
-                <div class="upgrade-info"><span>💪 Сила кліку +1</span><span><span id="power-cost">50</span> 💰</span></div>
+                <div class="upgrade-info">
+                    <span>💪 Сила кліку +1</span>
+                    <span><span id="power-cost">50</span> 💰</span>
+                </div>
                 <div class="upgrade-detail">Поточна сила: <span id="current-power">1</span></div>
             </button>
             <button class="upgrade-button auto" id="auto-upgrade">
-                <div class="upgrade-info"><span>🤖 Авто-клікер</span><span><span id="auto-cost">200</span> 💰</span></div>
+                <div class="upgrade-info">
+                    <span>🤖 Авто-клікер</span>
+                    <span><span id="auto-cost">200</span> 💰</span>
+                </div>
                 <div class="upgrade-detail">Маєш: <span id="auto-count">0</span> (+<span id="auto-rate">0</span>/сек)</div>
             </button>
         </div>
@@ -159,9 +167,12 @@
             tg.ready();
             tg.expand();
             tgUser = tg.initDataUnsafe?.user;
-            if (tgUser && tgUser.id) isAuthorized = true;
+            if (tgUser && tgUser.id) {
+                isAuthorized = true;
+            }
         }
 
+        // ✅ Відносний шлях — працює на тому самому домені
         const API_URL = "/api";
 
         let gameState = {
@@ -189,20 +200,6 @@
             clickerSection: document.getElementById('clicker-section'),
             leaderboardList: document.getElementById('leaderboard-list')
         };
-
-        // === ЗАХИСТ ВІД ПРОКРУТКИ ТА ЗУМУ НА iOS ===
-        const kebabBtn = e.kebabButton;
-        ['touchstart', 'touchmove', 'touchend'].forEach(event => {
-            kebabBtn.addEventListener(event, (ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-            }, { passive: false });
-        });
-        kebabBtn.addEventListener('contextmenu', (ev) => {
-            ev.preventDefault();
-            ev.stopPropagation();
-            return false;
-        });
 
         function getPowerCost() { return Math.floor(50 * Math.pow(1.5, gameState.clickPower - 1)); }
         function getAutoCost() { return Math.floor(200 * Math.pow(1.8, gameState.autoClickers)); }
@@ -245,7 +242,7 @@
 
         async function loadGame() {
             if (!isAuthorized) {
-                e.leaderboardList.innerHTML = "❌ Гра працює тільки в Telegram";
+                e.leaderboardList.innerHTML = "❌ Потрібно запускати в Telegram";
                 return;
             }
             try {
@@ -271,7 +268,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user_id: tgUser.id,
-                        username: tgUser.username || tgUser.first_name || "Гравець",
+                        username: tgUser.username || tgUser.first_name || "Анонім",
                         state: {
                             clicks: gameState.clicks,
                             totalClicks: gameState.totalClicks,
@@ -333,7 +330,7 @@
         });
 
         e.resetButton.addEventListener('click', () => {
-            if (confirm('Скинути гру? Весь прогрес буде втрачено!')) {
+            if (confirm('Скинути гру?')) {
                 gameState = { clicks: 0, totalClicks: 0, level: 1, clickPower: 1, autoClickers: 0, coins: 0 };
                 updateUI();
                 saveGame();
@@ -354,8 +351,8 @@
         if (isAuthorized) {
             loadGame();
         } else {
-            // Для локального тестування (не використовується в Telegram)
-            tgUser = { id: 999999, first_name: "Тест", username: "testuser" };
+            // Для тестування поза Telegram (не використовується в продакшені)
+            tgUser = { id: 999999, first_name: "Тестер", username: "testuser" };
             isAuthorized = true;
             loadGame();
         }
